@@ -1,0 +1,33 @@
+
+create table tbl_user(
+u_id	VARCHAR2(125)	NOT NULL	PRIMARY KEY,
+u_nick	nVARCHAR2(125)		,
+u_name	nVARCHAR2(125)	NOT NULL	,
+u_password	VARCHAR2(125)	NOT NULL,	
+u_tel	VARCHAR2(20)		,
+u_grade	VARCHAR2(5)		
+);
+
+CREATE TABLE TBL_uhobby(
+    uh_seq	NUMBER	NOT NULL	PRIMARY KEY,
+    uh_id	VARCHAR2(125)	NOT NULL	,
+    uh_code	VARCHAR2(5)	NOT NULL	
+
+);
+
+CREATE TABLE tbl_hobby(
+H_CODE	VARCHAR2(5)	NOT NULL	PRIMARY KEY,
+H_NAME	NVARCHAR2(125)	NOT NULL	,
+H_REM	NVARCHAR2(125)		
+);
+
+drop table tbl_uhobby;
+
+CREATE SEQUENCE SEQ_UHOBBY
+START WITH 1 INCREMENT BY 1;
+
+drop SEQUENCE SEQ_uhobby;
+COMMIT;
+
+SELECT * FROM tbl_user;
+drop table tbl_user;
