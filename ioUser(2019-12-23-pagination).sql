@@ -18,4 +18,50 @@
     실제 select * from [table]을 수행하더라도 보통 200개 단위로 구분하여 fetch(읽어들이기)를 수행하는 기능이 담겨있다
     
     select * from [table] order by를 사용할 경우 자체 엔진이 상당히 무리하게 작동을 한다
+    하지만, 오라클에서는 order by와 where 절을 같이 사용하지만 않으면 자체 opt 엔진이 나름대로 방법으로 정렬을 수행한다
+    
+    오라클 pagination에서는 정렬따로, where 따로 만들어서 사용을 한다. sub query를 사용하여 sql을 만든다
 */
+
+-- 표준 sql을 사용한 내림차순 정렬 sql
+SELECT * FROM tbl_product ORDER BY p_code DESC;
+
+/*
+    INDEX_DESC[table] [index이름]
+    [index이름]으로 설정된 인덱스를 사용하여 내림차순 정렬한 후 보여달라
+    
+    FIRST_ROWS
+    우선적으로 앞쪽에 있는 레코드들을 먼저 보여달라
+    데이터가 많을때 순서가 앞에 있는 레코드를 먼저 찾는 옵티마이저 알고리즘을 작동시켜라
+    where 절에서 ROWNUM의 가상 칼럼값을 N이하
+    
+*/
+-- 오라클의 Hint라는 기능을 사용하여 PK를 기준으로 내림차순 정렬한 sql
+-- CURSOR 구현
+SELECT /*+ FIRST_ROWS */ ROWNUM, IP.* FROM
+(
+    SELECT /*+ INDEX_DESC(P) FIRST_ROWS */ * FROM tbl_product P
+)IP
+WHERE ROWNUM <= 10;
+
+/*
+    FIRST_ROWS hint는 무조건 table의 첫번재 레코드부터 최적화 알고리즘을 작동시키도록 구조가 만들어져 있어서 between을 사용하면
+    동작하지 않는다
+*/
+SELECT /*+ FIRST_ROWS */ ROWNUM, IP.* FROM
+(
+    SELECT /*+ INDEX_DESC(P) FIRST_ROWS */ * FROM tbl_product P
+)IP
+WHERE ROWNUM <= 100;
+
+-- 사용자에게 입력받아서 테스트하는 코드
+-- &변수를 사용하면 쿼리 실행에서 입력창이 나타나서 값을 입력할 수 있다
+SELECT * FROM(
+    SELECT /*+ FIRST_ROWS_100 */ ROWNUM AS NUM, IP.* FROM
+    (
+        SELECT /*+ INDEX_DESC(P) FIRST_ROWS */ * FROM tbl_product P
+    )IP
+    WHERE ROWNUM <= &LAST_NO
+) TBL
+WHERE NUM >= &FIRST_NO;
+
